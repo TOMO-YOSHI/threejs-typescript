@@ -12,6 +12,7 @@
   "devDependencies": {
     "@types/dat.gui": "^0.7.7",
     "@types/three": "^0.150.1",
+    "dat.gui": "^0.7.9",
     "three": "^0.151.3",
     "ts-loader": "^9.4.2",
     "typescript": "^5.0.4",
