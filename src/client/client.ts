@@ -1,90 +1,133 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import Stats from 'three/examples/jsm/libs/stats.module'
+import { GUI } from 'dat.gui'
 
 const scene = new THREE.Scene()
-const scene2 = new THREE.Scene()
-scene.background = new THREE.Color(0x000000)
-const camera1 = new THREE.PerspectiveCamera(
+scene.add(new THREE.AxesHelper(5))
+
+const camera = new THREE.PerspectiveCamera(
   75,
-  1,
-  // window.innerWidth / window.innerHeight,
+  window.innerWidth / window.innerHeight,
   0.1,
   1000
 )
-const camera2 = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10)
-const camera3 = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10)
-const camera4 = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10)
+camera.position.x = 4
+camera.position.y = 4
+camera.position.z = 4
 
-camera1.position.z = 2
+const renderer = new THREE.WebGLRenderer()
+renderer.setSize(window.innerWidth, window.innerHeight)
+document.body.appendChild(renderer.domElement)
 
-camera2.position.y = 2
-camera2.lookAt(new THREE.Vector3())
+const controls = new OrbitControls(camera, renderer.domElement)
+controls.target.set(8, 0, 0)
 
-camera3.position.x = -2
-camera3.lookAt(new THREE.Vector3(0, 0, 0))
+const light1 = new THREE.PointLight()
+light1.position.set(10, 10, 10)
+scene.add(light1)
 
-camera4.position.z = 2
+const light2 = new THREE.PointLight()
+light2.position.set(-10, 10, 10)
+scene.add(light2)
 
-const canvas1 = document.getElementById("c1")!;
-const canvas2 = document.getElementById("c2")!;
-const canvas3 = document.getElementById("c3")!;
-const canvas4 = document.getElementById("c4")!;
+const object1 = new THREE.Mesh(
+  new THREE.SphereGeometry(),
+  new THREE.MeshPhongMaterial({ color: 0xff0000 })
+)
+object1.position.set(4, 0, 0)
+scene.add(object1)
+object1.add(new THREE.AxesHelper(5))
 
-// const renderer = new THREE.WebGLRenderer()
-const renderer1 = new THREE.WebGLRenderer({canvas: canvas1})
-renderer1.setSize(200, 200)
-const renderer2 = new THREE.WebGLRenderer({canvas: canvas2})
-renderer2.setSize(200, 200)
-const renderer3 = new THREE.WebGLRenderer({canvas: canvas3})
-renderer2.setSize(200, 200)
-const renderer4 = new THREE.WebGLRenderer({canvas: canvas4})
-renderer2.setSize(200, 200)
-// renderer.setSize(window.innerWidth, window.innerHeight)
-// document.body.appendChild(renderer.domElement)
+const object2 = new THREE.Mesh(
+  new THREE.SphereGeometry(),
+  new THREE.MeshPhongMaterial({ color: 0x00ff00 })
+)
+object2.position.set(4, 0, 0)
+object1.add(object2)
+object2.add(new THREE.AxesHelper(5))
 
-new OrbitControls(camera1, renderer1.domElement)
+const object3 = new THREE.Mesh(
+  new THREE.SphereGeometry(),
+  new THREE.MeshPhongMaterial({ color: 0x0000ff })
+)
+object3.position.set(4, 0, 0)
+object2.add(object3)
+object3.add(new THREE.AxesHelper(5))
 
-const geometry = new THREE.TorusKnotGeometry()
-// const geometry = new THREE.BoxGeometry()
-const material = new THREE.MeshBasicMaterial({
-  color: 0x00ff00,
-  wireframe: true,
-})
-
-const cube = new THREE.Mesh(geometry, material)
-cube.scale.x = .5
-cube.scale.y = .5
-cube.scale.z = .5
-scene.add(cube)
-
-const cube2 = new THREE.Mesh(geometry, material)
-scene2.add(cube2)
-
-// window.addEventListener('resize', onWindowResize, false)
-// function onWindowResize() {
-//   camera.aspect = window.innerWidth / window.innerHeight
-//   camera.updateProjectionMatrix()
-//   renderer.setSize(window.innerWidth, window.innerHeight)
-//   render()
-// }
-
-function animate() {
-  requestAnimationFrame(animate)
-
-  cube.rotation.x += 0.01
-  cube.rotation.y += 0.01
-
-  cube2.rotation.x += 0.01
-  cube2.rotation.y += 0.01
-
+window.addEventListener('resize', onWindowResize, false)
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight
+  camera.updateProjectionMatrix()
+  renderer.setSize(window.innerWidth, window.innerHeight)
   render()
 }
 
+const gui = new GUI()
+const object1Folder = gui.addFolder('Object1')
+object1Folder.add(object1.position, 'x', 0, 10, 0.01).name('X Position')
+object1Folder
+  .add(object1.rotation, 'x', 0, Math.PI * 2, 0.01)
+  .name('X Rotation')
+object1Folder.add(object1.scale, 'x', 0, 2, 0.01).name('X Scale')
+object1Folder.open()
+const object2Folder = gui.addFolder('Object2')
+object2Folder.add(object2.position, 'x', 0, 10, 0.01).name('X Position')
+object2Folder
+  .add(object2.rotation, 'x', 0, Math.PI * 2, 0.01)
+  .name('X Rotation')
+object2Folder.add(object2.scale, 'x', 0, 2, 0.01).name('X Scale')
+object2Folder.open()
+const object3Folder = gui.addFolder('Object3')
+object3Folder.add(object3.position, 'x', 0, 10, 0.01).name('X Position')
+object3Folder
+  .add(object3.rotation, 'x', 0, Math.PI * 2, 0.01)
+  .name('X Rotation')
+object3Folder.add(object3.scale, 'x', 0, 2, 0.01).name('X Scale')
+object3Folder.open()
+
+const stats = new Stats()
+document.body.appendChild(stats.dom)
+
+const debug = document.getElementById('debug1') as HTMLDivElement
+
+function animate() {
+  requestAnimationFrame(animate)
+  controls.update()
+  render()
+  const object1WorldPosition = new THREE.Vector3()
+  object1.getWorldPosition(object1WorldPosition)
+  const object2WorldPosition = new THREE.Vector3()
+  object2.getWorldPosition(object2WorldPosition)
+  const object3WorldPosition = new THREE.Vector3()
+  object3.getWorldPosition(object3WorldPosition)
+  debug.innerText =
+    'Red\n' +
+    'Local Pos X : ' +
+    object1.position.x.toFixed(2) +
+    '\n' +
+    'World Pos X : ' +
+    object1WorldPosition.x.toFixed(2) +
+    '\n' +
+    '\nGreen\n' +
+    'Local Pos X : ' +
+    object2.position.x.toFixed(2) +
+    '\n' +
+    'World Pos X : ' +
+    object2WorldPosition.x.toFixed(2) +
+    '\n' +
+    '\nBlue\n' +
+    'Local Pos X : ' +
+    object3.position.x.toFixed(2) +
+    '\n' +
+    'World Pos X : ' +
+    object3WorldPosition.x.toFixed(2) +
+    '\n'
+  stats.update()
+}
+
 function render() {
-  renderer1.render(scene, camera1)
-  renderer2.render(scene2, camera2)
-  renderer3.render(scene, camera3)
-  renderer4.render(scene, camera4)
+  renderer.render(scene, camera)
 }
 
 animate()
